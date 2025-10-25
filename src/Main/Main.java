@@ -54,7 +54,7 @@ public class Main {
         conf.addRecord(insertQuery, userName, birth, address, contact, role, status);
 
         addActivityLog(userName, "Added new user record");
-        System.out.println("✅ User added successfully!");
+        System.out.println("User added successfully!");
     }
 
     // === DELETE USER ===
@@ -73,7 +73,7 @@ public class Main {
         userPasswords.remove(userId);
 
         addActivityLog(userId, "Deleted user record");
-        System.out.println("🗑️ User deleted successfully!");
+        System.out.println("User deleted successfully!");
     }
 
     // === UPDATE USER ===
@@ -107,7 +107,7 @@ public class Main {
         conf.updateRecord(updateQuery, userName, newAddress, newContact, newStatus, userId);
 
         addActivityLog(userId, "Updated user record");
-        System.out.println("✅ User updated successfully!");
+        System.out.println("User updated successfully!");
     }
 
     // === USER INFORMATION MANAGEMENT ===
@@ -124,7 +124,7 @@ public class Main {
             System.out.print("Enter Choice: ");
 
             if (!sc.hasNextInt()) {
-                System.out.println("❌ Invalid input. Numbers only.");
+                System.out.println("Invalid input. Numbers only.");
                 sc.nextLine();
                 continue;
             }
@@ -145,7 +145,7 @@ public class Main {
                 case 4:
                     return;
                 default:
-                    System.out.println("❌ Invalid choice. Try again.");
+                    System.out.println("Invalid choice. Try again.");
             }
         }
     }
@@ -200,12 +200,11 @@ public class Main {
         System.out.print("Enter Coverage Amount: ");
         String coverageAmount = sc.nextLine();
 
-        // info_id is auto-increment, no need to input manually
         String sql = "INSERT INTO tbl_info (user_id, beneficiary_name, insurance_type, coverage_amount) VALUES (?, ?, ?, ?)";
         conf.addRecord(sql, userId, beneficiaryName, insuranceType, coverageAmount);
 
         addActivityLog(userId, "Added insurance info");
-        System.out.println("✅ Insurance info added!");
+        System.out.println("Insurance info added!");
     }
 
     // === DELETE INSURANCE INFO ===
@@ -221,7 +220,7 @@ public class Main {
         conf.deleteRecord(deleteQuery, infoId);
 
         addActivityLog("System", "Deleted insurance info record");
-        System.out.println("🗑️ Insurance info deleted successfully!");
+        System.out.println("Insurance info deleted successfully!");
     }
 
     // === UPDATE INSURANCE INFO ===
@@ -243,7 +242,7 @@ public class Main {
         conf.updateRecord(sql, newType, newCoverage, infoId);
 
         addActivityLog("System", "Updated insurance info record");
-        System.out.println("✅ Insurance info updated!");
+        System.out.println("Insurance info updated!");
     }
 
     // === MANAGE INSURANCE INFO MENU ===
@@ -260,7 +259,7 @@ public class Main {
             System.out.print("Enter choice: ");
 
             if (!sc.hasNextInt()) {
-                System.out.println("❌ Invalid input. Numbers only.");
+                System.out.println("Invalid input. Numbers only.");
                 sc.nextLine();
                 continue;
             }
@@ -281,7 +280,7 @@ public class Main {
                 case 4:
                     return;
                 default:
-                    System.out.println("❌ Invalid choice.");
+                    System.out.println("Invalid choice.");
             }
         }
     }
@@ -302,7 +301,7 @@ public class Main {
             System.out.print("Enter Choice: ");
 
             if (!sc.hasNextInt()) {
-                System.out.println("❌ Invalid input. Numbers only.");
+                System.out.println("Invalid input. Numbers only.");
                 sc.nextLine();
                 continue;
             }
@@ -328,10 +327,10 @@ public class Main {
                     manageInsuranceInfo();
                     break;
                 case 6:
-                    System.out.println("👋 Exiting program...");
+                    System.out.println("Exiting program...");
                     return;
                 default:
-                    System.out.println("❌ Invalid choice. Try again.");
+                    System.out.println("Invalid choice. Try again.");
             }
         }
     }
