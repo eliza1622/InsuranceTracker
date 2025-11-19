@@ -8,10 +8,8 @@ import java.util.HashMap;
 
 public class Main {
 
-    // === TEMPORARY PASSWORD STORAGE (IN-SYSTEM ONLY) ===
     private static HashMap<String, String> userPasswords = new HashMap<>();
 
-    // === VIEW USERS ===
     public static void viewUsers() {
         String query = "SELECT * FROM tbl_user";
         String[] headers = {"User ID", "Name", "Birthdate", "Address", "Contact", "Role", "Status"};
@@ -20,14 +18,32 @@ public class Main {
         conf.viewRecords(query, headers, columns);
     }
 
-    // === ADD USER ===
+    public static boolean usernameExists(String username) {
+        config conf = new config();
+        Object[] row = conf.getSingleRecord("SELECT user_id FROM tbl_user WHERE user_name = ?", username);
+        return row != null;
+    }
+
     public static void addUser() {
         Scanner sc = new Scanner(System.in);
         config conf = new config();
 
-        System.out.println("\n=== ADD USER ===");
-        System.out.print("Enter User Name: ");
-        String userName = sc.nextLine();
+        System.out.println("\n=== SIGN UP (CREATE ACCOUNT) ===");
+        System.out.print("Enter Username: ");
+        String username = sc.nextLine().trim();
+
+        if (username.isEmpty()) {
+            System.out.println("Username cannot be empty.");
+            return;
+        }
+
+        if (usernameExists(username)) {
+            System.out.println("Username already exists. Try a different username.");
+            return;
+        }
+
+        System.out.print("Enter Password: ");
+        String password = sc.nextLine();
 
         System.out.print("Enter Birthdate (YYYY-MM-DD): ");
         String birth = sc.nextLine();
@@ -44,20 +60,15 @@ public class Main {
         System.out.print("Enter Status: ");
         String status = sc.nextLine();
 
-        System.out.print("Password: ");
-        String password = sc.nextLine();
+        userPasswords.put(username, password);
 
-        // Save password only in system memory
-        userPasswords.put(userName, password);
+        String insertQuery = "INSERT INTO tbl_user (user_name, user_birthdate, user_address, user_contact, user_role, user_status, user_password) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        conf.addRecord(insertQuery, username, birth, address, contact, role, status, password);
 
-        String insertQuery = "INSERT INTO tbl_user (user_name, user_birthdate, user_address, user_contact, user_role, user_status) VALUES (?, ?, ?, ?, ?, ?)";
-        conf.addRecord(insertQuery, userName, birth, address, contact, role, status);
-
-        addActivityLog(userName, "Added new user record");
-        System.out.println("User added successfully!");
+        addActivityLog(username, "Created new account");
+        System.out.println("Account created successfully!");
     }
 
-    // === DELETE USER ===
     public static void deleteUser() {
         Scanner sc = new Scanner(System.in);
         config conf = new config();
@@ -69,14 +80,12 @@ public class Main {
         String deleteQuery = "DELETE FROM tbl_user WHERE user_id = ?";
         conf.deleteRecord(deleteQuery, userId);
 
-        // Remove password from memory (if exists)
-        userPasswords.remove(userId);
+        userPasswords.values().removeIf(v -> true);
 
         addActivityLog(userId, "Deleted user record");
         System.out.println("User deleted successfully!");
     }
 
-    // === UPDATE USER ===
     public static void updateUser() {
         Scanner sc = new Scanner(System.in);
         config conf = new config();
@@ -97,11 +106,14 @@ public class Main {
         System.out.print("Enter new Status: ");
         String newStatus = sc.nextLine();
 
-        System.out.print("Password: ");
+        System.out.print("Password (leave blank to keep current): ");
         String newPassword = sc.nextLine();
 
-        // Update password in memory only
-        userPasswords.put(userName, newPassword);
+        if (!newPassword.isEmpty()) {
+            userPasswords.put(userName, newPassword);
+            String pwdUpdate = "UPDATE tbl_user SET user_password = ? WHERE user_id = ?";
+            conf.updateRecord(pwdUpdate, newPassword, userId);
+        }
 
         String updateQuery = "UPDATE tbl_user SET user_name = ?, user_address = ?, user_contact = ?, user_status = ? WHERE user_id = ?";
         conf.updateRecord(updateQuery, userName, newAddress, newContact, newStatus, userId);
@@ -110,7 +122,6 @@ public class Main {
         System.out.println("User updated successfully!");
     }
 
-    // === USER INFORMATION MANAGEMENT ===
     public static void manageUserInfo() {
         Scanner sc = new Scanner(System.in);
         int choice;
@@ -130,7 +141,7 @@ public class Main {
             }
 
             choice = sc.nextInt();
-            sc.nextLine(); // clear buffer
+            sc.nextLine();
 
             switch (choice) {
                 case 1:
@@ -150,7 +161,6 @@ public class Main {
         }
     }
 
-    // === ACTIVITY LOG ===
     public static void addActivityLog(String userId, String action) {
         config conf = new config();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
@@ -160,7 +170,6 @@ public class Main {
         conf.addRecord(sql, userId, action, timestamp);
     }
 
-    // === VIEW ACTIVITY LOGS ===
     public static void viewActivityLogs() {
         String query = "SELECT * FROM tbl_activity_log";
         String[] headers = {"Log ID", "User ID", "Action", "Timestamp"};
@@ -169,7 +178,6 @@ public class Main {
         conf.viewRecords(query, headers, columns);
     }
 
-    // === VIEW INSURANCE INFO ===
     public static void viewInfo() {
         String query = "SELECT * FROM tbl_info";
         String[] headers = {"Info ID", "User ID", "Beneficiary Name", "Insurance Type", "Coverage Amount"};
@@ -178,14 +186,11 @@ public class Main {
         conf.viewRecords(query, headers, columns);
     }
 
-    // === ADD INSURANCE INFO ===
     public static void addInfo() {
         Scanner sc = new Scanner(System.in);
         config conf = new config();
 
         System.out.println("\n=== ADD INSURANCE INFO ===");
-
-        // Display users to pick from
         System.out.println("Select User from the list below:");
         viewUsers();
         System.out.print("Enter User ID: ");
@@ -207,7 +212,6 @@ public class Main {
         System.out.println("Insurance info added!");
     }
 
-    // === DELETE INSURANCE INFO ===
     public static void deleteInfo() {
         Scanner sc = new Scanner(System.in);
         config conf = new config();
@@ -223,7 +227,6 @@ public class Main {
         System.out.println("Insurance info deleted successfully!");
     }
 
-    // === UPDATE INSURANCE INFO ===
     public static void updateInfo() {
         Scanner sc = new Scanner(System.in);
         config conf = new config();
@@ -245,7 +248,6 @@ public class Main {
         System.out.println("Insurance info updated!");
     }
 
-    // === MANAGE INSURANCE INFO MENU ===
     public static void manageInsuranceInfo() {
         Scanner sc = new Scanner(System.in);
         int choice;
@@ -265,7 +267,7 @@ public class Main {
             }
 
             choice = sc.nextInt();
-            sc.nextLine(); // clear buffer
+            sc.nextLine();
 
             switch (choice) {
                 case 1:
@@ -285,8 +287,30 @@ public class Main {
         }
     }
 
-    // === MAIN MENU ===
-    public static void main(String[] args) {
+    public static boolean login() {
+        Scanner sc = new Scanner(System.in);
+        config conf = new config();
+
+        System.out.println("\n=== LOGIN ===");
+        System.out.print("Username: ");
+        String username = sc.nextLine();
+
+        System.out.print("Password: ");
+        String password = sc.nextLine();
+
+        Object[] user = conf.getSingleRecord("SELECT * FROM tbl_user WHERE user_name = ? AND user_password = ?", username, password);
+
+        if (user != null) {
+            System.out.println("Login successful! Welcome, " + username + ".");
+            addActivityLog(username, "Logged in");
+            return true;
+        } else {
+            System.out.println("Invalid username or password.");
+            return false;
+        }
+    }
+
+    public static void mainMenu() {
         Scanner sc = new Scanner(System.in);
         int choice;
 
@@ -297,7 +321,7 @@ public class Main {
             System.out.println("3. View Activity Logs");
             System.out.println("4. Add Insurance Info");
             System.out.println("5. Manage Insurance Info");
-            System.out.println("6. Exit");
+            System.out.println("6. Logout");
             System.out.print("Enter Choice: ");
 
             if (!sc.hasNextInt()) {
@@ -307,7 +331,7 @@ public class Main {
             }
 
             choice = sc.nextInt();
-            sc.nextLine(); // clear buffer
+            sc.nextLine();
 
             switch (choice) {
                 case 1:
@@ -327,10 +351,55 @@ public class Main {
                     manageInsuranceInfo();
                     break;
                 case 6:
-                    System.out.println("Exiting program...");
+                    System.out.println("Logging out...");
                     return;
                 default:
                     System.out.println("Invalid choice. Try again.");
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("\n===== WELCOME =====");
+            System.out.println("1. Login");
+            System.out.println("2. Sign Up");
+            System.out.println("3. Exit");
+            System.out.print("Enter choice: ");
+
+            String raw = sc.nextLine();
+            if (raw.isEmpty()) {
+                System.out.println("Please enter a choice.");
+                continue;
+            }
+
+            int choice;
+            try {
+                choice = Integer.parseInt(raw);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Numbers only.");
+                continue;
+            }
+
+            switch (choice) {
+                case 1:
+                    if (login()) {
+                        mainMenu();
+                    }
+                    break;
+
+                case 2:
+                    addUser();
+                    break;
+
+                case 3:
+                    System.out.println("Exiting...");
+                    return;
+
+                default:
+                    System.out.println("Invalid choice.");
             }
         }
     }
