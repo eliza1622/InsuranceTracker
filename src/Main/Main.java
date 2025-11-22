@@ -25,49 +25,90 @@ public class Main {
     }
 
     public static void addUser() {
-        Scanner sc = new Scanner(System.in);
-        config conf = new config();
+    Scanner sc = new Scanner(System.in);
+    config conf = new config();
 
-        System.out.println("\n=== SIGN UP (CREATE ACCOUNT) ===");
+    System.out.println("\n=== SIGN UP (CREATE ACCOUNT) ===");
+
+    // INPUT USERNAME
+    String username;
+    while (true) {
         System.out.print("Enter Username: ");
-        String username = sc.nextLine().trim();
+        username = sc.nextLine().trim();
 
         if (username.isEmpty()) {
-            System.out.println("Username cannot be empty.");
-            return;
+            System.out.println("❌ Username cannot be empty.");
+            continue;
         }
 
         if (usernameExists(username)) {
-            System.out.println("Username already exists. Try a different username.");
-            return;
+            System.out.println("❌ Username already exists. Try another.");
+            continue;
         }
 
-        System.out.print("Enter Password: ");
-        String password = sc.nextLine();
-
-        System.out.print("Enter Birthdate (YYYY-MM-DD): ");
-        String birth = sc.nextLine();
-
-        System.out.print("Enter Address: ");
-        String address = sc.nextLine();
-
-        System.out.print("Enter Contact: ");
-        String contact = sc.nextLine();
-
-        System.out.print("Enter Role: ");
-        String role = sc.nextLine();
-
-        System.out.print("Enter Status: ");
-        String status = sc.nextLine();
-
-        userPasswords.put(username, password);
-
-        String insertQuery = "INSERT INTO tbl_user (user_name, user_birthdate, user_address, user_contact, user_role, user_status, user_password) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        conf.addRecord(insertQuery, username, birth, address, contact, role, status, password);
-
-        addActivityLog(username, "Created new account");
-        System.out.println("Account created successfully!");
+        break;
     }
+
+    // INPUT PASSWORD
+    String password;
+    while (true) {
+        System.out.print("Enter Password (min 6 chars): ");
+        password = sc.nextLine();
+
+        if (password.length() < 6) {
+            System.out.println("❌ Password must be at least 6 characters.");
+            continue;
+        }
+        break;
+    }
+
+    // INPUT BIRTHDATE
+    String birth;
+    while (true) {
+        System.out.print("Enter Birthdate (YYYY-MM-DD): ");
+        birth = sc.nextLine();
+
+        if (!birth.matches("\\d{4}-\\d{2}-\\d{2}")) {
+            System.out.println("❌ Invalid date format. Try again.");
+            continue;
+        }
+        break;
+    }
+
+    // INPUT ADDRESS
+    System.out.print("Enter Address: ");
+    String address = sc.nextLine();
+
+    // CONTACT NUMBER VALIDATION
+    String contact;
+    while (true) {
+        System.out.print("Enter Contact Number: ");
+        contact = sc.nextLine();
+
+        if (!contact.matches("\\d+")) {
+            System.out.println("❌ Contact must be numbers only.");
+            continue;
+        }
+        break;
+    }
+
+    System.out.print("Enter Role:  ");
+    String role = sc.nextLine();
+
+    System.out.print("Enter Status(Married/ Single): ");
+    String status = sc.nextLine();
+
+    // SAVE PASSWORD
+    userPasswords.put(username, password);
+
+    // SAVE TO DATABASE
+    String insertQuery = "INSERT INTO tbl_user (user_name, user_birthdate, user_address, user_contact, user_role, user_status, user_password) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    conf.addRecord(insertQuery, username, birth, address, contact, role, status, password);
+
+    addActivityLog(username, "Created new account");
+    System.out.println("✔ Account created successfully!");
+}
+
 
     public static void deleteUser() {
         Scanner sc = new Scanner(System.in);
@@ -288,27 +329,44 @@ public class Main {
     }
 
     public static boolean login() {
-        Scanner sc = new Scanner(System.in);
-        config conf = new config();
+    Scanner sc = new Scanner(System.in);
+    config conf = new config();
 
-        System.out.println("\n=== LOGIN ===");
-        System.out.print("Username: ");
-        String username = sc.nextLine();
+    System.out.println("\n=== INSURANCE CLIENT TRACKER SYSTEM ===");
+    System.out.println("\n=== LOGIN ===");
 
-        System.out.print("Password: ");
-        String password = sc.nextLine();
+    System.out.print("Username: ");
+    String username = sc.nextLine().trim();
 
-        Object[] user = conf.getSingleRecord("SELECT * FROM tbl_user WHERE user_name = ? AND user_password = ?", username, password);
-
-        if (user != null) {
-            System.out.println("Login successful! Welcome, " + username + ".");
-            addActivityLog(username, "Logged in");
-            return true;
-        } else {
-            System.out.println("Invalid username or password.");
-            return false;
-        }
+    if (username.isEmpty()) {
+        System.out.println("❌ Username cannot be empty.");
+        return false;
     }
+
+    System.out.print("Password: ");
+    String password = sc.nextLine();
+
+    if (password.isEmpty()) {
+        System.out.println("❌ Password cannot be empty.");
+        return false;
+    }
+
+    // Validate user exists
+    Object[] user = conf.getSingleRecord(
+        "SELECT * FROM tbl_user WHERE user_name = ? AND user_password = ?",
+        username, password
+    );
+
+    if (user != null) {
+        System.out.println("✔ Login successful! Welcome, " + username + ".");
+        addActivityLog(username, "Logged in");
+        return true;
+    } else {
+        System.out.println("❌ Invalid username or password.");
+        return false;
+    }
+}
+
 
     public static void mainMenu() {
         Scanner sc = new Scanner(System.in);
@@ -363,7 +421,7 @@ public class Main {
         Scanner sc = new Scanner(System.in);
 
         while (true) {
-            System.out.println("\n===== WELCOME =====");
+            System.out.println("\n=== INSURANCE CLIENT TRACKER SYSTEM ===");
             System.out.println("1. Login");
             System.out.println("2. Sign Up");
             System.out.println("3. Exit");
